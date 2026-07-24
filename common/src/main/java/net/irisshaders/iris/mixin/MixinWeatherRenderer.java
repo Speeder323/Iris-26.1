@@ -21,9 +21,9 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin(WeatherEffectRenderer.class)
 public class MixinWeatherRenderer {
 	@WrapMethod(method = "render")
-	private void iris$disableWeather(Vec3 cameraPos, WeatherRenderState renderState, Operation<Void> original) {
+	private void iris$disableWeather(MultiBufferSource bufferSource, Vec3 cameraPos, WeatherRenderState renderState, Operation<Void> original) {
 		if (Iris.getPipelineManager().getPipeline().map(WorldRenderingPipeline::shouldRenderWeather).orElse(true)) {
-			original.call(cameraPos, renderState);
+			original.call(bufferSource, cameraPos, renderState);
 		}
 	}
 
