@@ -6,15 +6,15 @@ import net.irisshaders.iris.NeoLambdas;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.util.Mth;
-import net.minecraft.world.attribute.EnvironmentAttributes;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -41,7 +41,7 @@ public class MixinLevelRenderer_Sky {
 	 * outside of water, so the fog should also be covering the sun and sky.</p>
 	 *
 	 * <p>When updating Sodium to new releases of the game, please check for new
-	 * ways the fog can be reduced in {@link FogRenderer#setupFog}.</p>
+	 * ways the fog can be reduced in {@link net.minecraft.client.renderer.fog.FogRenderer#setupFog}.</p>
 	 */
 	@Inject(method = {MojLambdas.RENDER_SKY, NeoLambdas.NEO_RENDER_SKY }, require = 1, at = @At("HEAD"), cancellable = true)
 	private static void preRenderSky(CallbackInfo ci) {
@@ -51,12 +51,19 @@ public class MixinLevelRenderer_Sky {
 			Entity cameraEntity = camera.entity();
 
 			boolean isSubmersed = camera.getFluidInCamera() != FogType.NONE;
-			boolean blockSky = ((LevelRendererAccessor) Minecraft.getInstance().levelRenderer).getLevelRenderState().cameraRenderState.entityRenderState.doesMobEffectBlockSky;
+			boolean blockSky = iris$doesMobEffectBlockSky(camera);
 			boolean useThickFog = Minecraft.getInstance().gui.getBossOverlay().shouldCreateWorldFog();
 
 			if (isSubmersed || blockSky || useThickFog) {
 				ci.cancel();
 			}
 		}
+	}
+
+	// Mirrors LevelRenderer#doesMobEffectBlockSky, which is private and cannot be shadowed into this static handler.
+	@Unique
+	private static boolean iris$doesMobEffectBlockSky(Camera camera) {
+		return camera.entity() instanceof LivingEntity livingEntity
+			&& (livingEntity.hasEffect(MobEffects.BLINDNESS) || livingEntity.hasEffect(MobEffects.DARKNESS));
 	}
 }

@@ -5,15 +5,9 @@ import com.mojang.blaze3d.opengl.GlConst;
 import com.mojang.blaze3d.opengl.GlProgram;
 import com.mojang.blaze3d.opengl.GlRenderPass;
 import com.mojang.blaze3d.opengl.GlStateManager;
-import com.mojang.blaze3d.opengl.GlTexture;
-import com.mojang.blaze3d.opengl.Uniform;
 import com.mojang.blaze3d.pipeline.BlendFunction;
-import com.mojang.blaze3d.pipeline.DepthStencilState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.FilterMode;
-import com.mojang.blaze3d.textures.GpuTextureView;
-import it.unimi.dsi.fastutil.ints.IntList;
+import com.mojang.blaze3d.platform.DepthTestFunction;
 import net.irisshaders.iris.Iris;
 import net.irisshaders.iris.gl.blending.DepthColorStorage;
 import net.irisshaders.iris.pipeline.IrisRenderingPipeline;
@@ -56,7 +50,7 @@ public class MixinGlCommandEncoder {
 	private List<IrisProgram> programsToClear = new ArrayList<>();
 
 	// Do not change the viewport in the shadow pass.
-	@Redirect(method = "createRenderPass(Ljava/util/function/Supplier;Lcom/mojang/blaze3d/textures/GpuTextureView;Ljava/util/OptionalInt;Lcom/mojang/blaze3d/textures/GpuTextureView;Ljava/util/OptionalDouble;)Lcom/mojang/blaze3d/systems/RenderPassBackend;", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/opengl/GlStateManager;_viewport(IIII)V"))
+	@Redirect(method = "createRenderPass(Ljava/util/function/Supplier;Lcom/mojang/blaze3d/textures/GpuTextureView;Ljava/util/OptionalInt;Lcom/mojang/blaze3d/textures/GpuTextureView;Ljava/util/OptionalDouble;)Lcom/mojang/blaze3d/systems/RenderPass;", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/opengl/GlStateManager;_viewport(IIII)V"))
 	private void changeViewport(int i, int j, int k, int l) {
 		if (ShadowRenderingState.areShadowsCurrentlyBeingRendered()) {
 			return;
@@ -65,8 +59,8 @@ public class MixinGlCommandEncoder {
 		}
 	}
 
-	// Do not change the viewport in the shadow pass.
-	@Redirect(method = "createRenderPass(Ljava/util/function/Supplier;Lcom/mojang/blaze3d/textures/GpuTextureView;Ljava/util/OptionalInt;Lcom/mojang/blaze3d/textures/GpuTextureView;Ljava/util/OptionalDouble;)Lcom/mojang/blaze3d/systems/RenderPassBackend;", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/opengl/GlStateManager;_glBindFramebuffer(II)V"))
+	// Do not change the framebuffer in the shadow pass.
+	@Redirect(method = "createRenderPass(Ljava/util/function/Supplier;Lcom/mojang/blaze3d/textures/GpuTextureView;Ljava/util/OptionalInt;Lcom/mojang/blaze3d/textures/GpuTextureView;Ljava/util/OptionalDouble;)Lcom/mojang/blaze3d/systems/RenderPass;", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/opengl/GlStateManager;_glBindFramebuffer(II)V"))
 	private void changeFramebuffer(int i, int j) {
 		if (ShadowRenderingState.areShadowsCurrentlyBeingRendered() || ImmediateState.safeToMultiply) {
 			this.tempFBO = j;
@@ -117,21 +111,11 @@ public class MixinGlCommandEncoder {
 			if (this.lastPipeline != pipeline) {
 				this.lastPipeline = pipeline;
 
-				DepthStencilState depthStencilState = pipeline.getDepthStencilState();
-				if (depthStencilState != null) {
+				if (pipeline.getDepthTestFunction() != DepthTestFunction.NO_DEPTH_TEST) {
 					GlStateManager._enableDepthTest();
-					GlStateManager._depthFunc(GlConst.toGl(depthStencilState.depthTest()));
-					GlStateManager._depthMask(depthStencilState.writeDepth());
-					if (depthStencilState.depthBiasConstant() == 0.0F && depthStencilState.depthBiasScaleFactor() == 0.0F) {
-						GlStateManager._disablePolygonOffset();
-					} else {
-						GlStateManager._polygonOffset(depthStencilState.depthBiasScaleFactor(), depthStencilState.depthBiasConstant());
-						GlStateManager._enablePolygonOffset();
-					}
+					GlStateManager._depthFunc(GlConst.toGl(pipeline.getDepthTestFunction()));
 				} else {
 					GlStateManager._disableDepthTest();
-					GlStateManager._depthMask(false);
-					GlStateManager._disablePolygonOffset();
 				}
 
 				if (pipeline.isCull()) {
@@ -140,9 +124,20 @@ public class MixinGlCommandEncoder {
 					GlStateManager._disableCull();
 				}
 
-				if (pipeline.getColorTargetState().blendFunction().isPresent()) {
+				GlStateManager._polygonMode(1032, GlConst.toGl(pipeline.getPolygonMode()));
+				GlStateManager._depthMask(pipeline.isWriteDepth());
+				GlStateManager._colorMask(pipeline.isWriteColor(), pipeline.isWriteColor(), pipeline.isWriteColor(), pipeline.isWriteAlpha());
+
+				if (pipeline.getDepthBiasConstant() == 0.0F && pipeline.getDepthBiasScaleFactor() == 0.0F) {
+					GlStateManager._disablePolygonOffset();
+				} else {
+					GlStateManager._polygonOffset(pipeline.getDepthBiasScaleFactor(), pipeline.getDepthBiasConstant());
+					GlStateManager._enablePolygonOffset();
+				}
+
+				if (pipeline.getBlendFunction().isPresent()) {
 					GlStateManager._enableBlend();
-					BlendFunction blendFunction = (BlendFunction)pipeline.getColorTargetState().blendFunction().get();
+					BlendFunction blendFunction = pipeline.getBlendFunction().get();
 					GlStateManager._blendFuncSeparate(
 						GlConst.toGl(blendFunction.sourceColor()),
 						GlConst.toGl(blendFunction.destColor()),
@@ -153,8 +148,15 @@ public class MixinGlCommandEncoder {
 					GlStateManager._disableBlend();
 				}
 
-				GlStateManager._polygonMode(1032, GlConst.toGl(pipeline.getPolygonMode()));
-				GlStateManager._colorMask(pipeline.getColorTargetState().writeMask());
+				switch (pipeline.getColorLogic()) {
+					case NONE:
+						GlStateManager._disableColorLogicOp();
+						break;
+					case OR_REVERSE:
+						GlStateManager._enableColorLogicOp();
+						GlStateManager._logicOp(5387);
+						break;
+				}
 			}
 		}
 	}

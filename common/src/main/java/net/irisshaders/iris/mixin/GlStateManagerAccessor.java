@@ -12,7 +12,7 @@ public interface GlStateManagerAccessor {
 	}
 
 	@Accessor("COLOR_MASK")
-	static int getCOLOR_MASK() {
+	static GlStateManager.ColorMask getCOLOR_MASK() {
 		throw new UnsupportedOperationException("Not accessed");
 	}
 

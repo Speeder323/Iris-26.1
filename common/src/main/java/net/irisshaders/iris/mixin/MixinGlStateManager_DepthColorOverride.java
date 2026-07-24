@@ -15,10 +15,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(GlStateManager.class)
 public class MixinGlStateManager_DepthColorOverride {
-	@Inject(method = "_colorMask", at = @At("HEAD"), cancellable = true, remap = false)
-	private static void iris$colorMaskLock(int writeMask, CallbackInfo ci) {
+	@Inject(method = "_colorMask(ZZZZ)V", at = @At("HEAD"), cancellable = true, remap = false)
+	private static void iris$colorMaskLock(boolean red, boolean green, boolean blue, boolean alpha, CallbackInfo ci) {
 		if (DepthColorStorage.isDepthColorLocked()) {
-			DepthColorStorage.deferColorMask(writeMask);
+			DepthColorStorage.deferColorMask(red, green, blue, alpha);
 			ci.cancel();
 		}
 	}

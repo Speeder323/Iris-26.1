@@ -5,7 +5,7 @@ import net.irisshaders.iris.mixin.GlStateManagerAccessor;
 
 public class DepthColorStorage {
 	private static boolean originalDepthEnable;
-	private static int originalColor;
+	private static ColorMask originalColor;
 	private static boolean depthColorLocked;
 
 	public static boolean isDepthColorLocked() {
@@ -15,11 +15,11 @@ public class DepthColorStorage {
 	public static void disableDepthColor() {
 		if (!depthColorLocked) {
 			// Only save the previous state if the depth and color mask wasn't already locked
-			int colorMask = GlStateManagerAccessor.getCOLOR_MASK();
+			GlStateManager.ColorMask colorMask = GlStateManagerAccessor.getCOLOR_MASK();
 			GlStateManager.DepthState depthState = GlStateManagerAccessor.getDEPTH();
 
 			originalDepthEnable = depthState.mask;
-			originalColor = colorMask;
+			originalColor = new ColorMask(colorMask.red, colorMask.green, colorMask.blue, colorMask.alpha);
 		}
 
 		depthColorLocked = false;
@@ -34,8 +34,8 @@ public class DepthColorStorage {
 		originalDepthEnable = enabled;
 	}
 
-	public static void deferColorMask(int writeMask) {
-		originalColor = writeMask;
+	public static void deferColorMask(boolean red, boolean green, boolean blue, boolean alpha) {
+		originalColor = new ColorMask(red, green, blue, alpha);
 	}
 
 	public static void unlockDepthColor() {
@@ -47,6 +47,6 @@ public class DepthColorStorage {
 
 		GlStateManager._depthMask(originalDepthEnable);
 
-		GlStateManager._colorMask((originalColor & 1) != 0, (originalColor & 2) != 0, (originalColor & 4) != 0, (originalColor & 8) != 0);
+		GlStateManager._colorMask(originalColor.isRedMasked(), originalColor.isGreenMasked(), originalColor.isBlueMasked(), originalColor.isAlphaMasked());
 	}
 }

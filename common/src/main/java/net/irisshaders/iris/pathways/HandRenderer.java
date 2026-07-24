@@ -51,9 +51,9 @@ public class HandRenderer {
 		scaleMatrix.mul(CapturedRenderingState.INSTANCE.getGbufferProjection());
 
 		poseStack.pushPose();
-		((GameRendererAccessor) gameRenderer).invokeBobHurt(camera, poseStack);
+		((GameRendererAccessor) gameRenderer).invokeBobHurt(poseStack, tickDelta);
 		if (Minecraft.getInstance().options.bobView().get()) {
-			((GameRendererAccessor) gameRenderer).invokeBobView(camera, poseStack);
+			((GameRendererAccessor) gameRenderer).invokeBobView(poseStack, tickDelta);
 		}
 		scaleMatrix.mul(poseStack.last().pose());
 		RenderSystem.setProjectionMatrix(cachedProjectionMatrixBuffer.getBuffer(scaleMatrix), ProjectionType.PERSPECTIVE);

@@ -1,26 +1,13 @@
 package net.irisshaders.iris.mixin;
 
-import com.mojang.blaze3d.systems.RenderPass;
-import com.mojang.blaze3d.systems.RenderPassBackend;
-import net.irisshaders.iris.mixinterface.CustomPass;
-import net.irisshaders.iris.mixinterface.RenderPassInterface;
-import org.spongepowered.asm.mixin.Final;
+import com.mojang.blaze3d.opengl.GlRenderPass;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(RenderPass.class)
-public class MixinRenderPass3 implements RenderPassInterface {
-	@Shadow
-	@Final
-	private RenderPassBackend backend;
-
-	@Override
-	public CustomPass iris$getCustomPass() {
-		return this.backend.iris$getCustomPass();
-	}
-
-	@Override
-	public void iris$setCustomPass(CustomPass pass) {
-		this.backend.iris$setCustomPass(pass);
-	}
+/**
+ * No-op on 1.21.11: {@link com.mojang.blaze3d.systems.RenderPass} is an interface implemented directly by
+ * {@link GlRenderPass}, so there is no wrapper/backend split to bridge (see MixinRenderPass and
+ * MixinRenderPass_Stub). This class should be removed from the mixin config along with this file.
+ */
+@Mixin(GlRenderPass.class)
+public class MixinRenderPass3 {
 }
