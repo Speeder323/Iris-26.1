@@ -1,14 +1,14 @@
 package net.irisshaders.iris.platform;
 
 import com.mojang.blaze3d.textures.TextureFormat;
-import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.SemanticVersion;
 import net.fabricmc.loader.api.VersionParsingException;
 import net.irisshaders.iris.gl.texture.DepthBufferFormat;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
@@ -59,7 +59,7 @@ public class IrisFabricHelpers implements IrisPlatformHelpers {
 
 	@Override
 	public KeyMapping registerKeyBinding(KeyMapping keyMapping) {
-		return KeyMappingHelper.registerKeyMapping(keyMapping);
+		return KeyBindingHelper.registerKeyBinding(keyMapping);
 	}
 
 	@Override

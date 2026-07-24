@@ -1,7 +1,7 @@
 plugins {
     id("java")
     id("idea")
-    id("net.fabricmc.fabric-loom") version("1.15.4")
+    id("fabric-loom") version("1.16.1")
     id("com.github.gmazzo.buildconfig") version "5.3.5"
 }
 
@@ -51,14 +51,15 @@ buildConfig {
 
 dependencies {
     minecraft(group = "com.mojang", name = "minecraft", version = MINECRAFT_VERSION)
+    mappings(loom.officialMojangMappings())
 
-    implementation("net.fabricmc:fabric-loader:$FABRIC_LOADER_VERSION")
+    modImplementation("net.fabricmc:fabric-loader:$FABRIC_LOADER_VERSION")
 
-    compileOnly(fabricApi.module("fabric-resource-loader-v1", FABRIC_API_VERSION))
-    compileOnly(fabricApi.module("fabric-block-getter-api-v2", FABRIC_API_VERSION))
-    compileOnly(fabricApi.module("fabric-renderer-api-v1", FABRIC_API_VERSION))
+    modCompileOnly(fabricApi.module("fabric-resource-loader-v0", FABRIC_API_VERSION))
+    modCompileOnly(fabricApi.module("fabric-block-view-api-v2", FABRIC_API_VERSION))
+    modCompileOnly(fabricApi.module("fabric-renderer-api-v1", FABRIC_API_VERSION))
 
-    implementation(SODIUM_DEPENDENCY_FABRIC)
+    modImplementation(SODIUM_DEPENDENCY_FABRIC)
     compileOnly("org.antlr:antlr4-runtime:4.13.1")
     compileOnly("io.github.douira:glsl-transformer:3.0.0-pre3")
     compileOnly("org.anarres:jcpp:1.4.14")

@@ -1,7 +1,7 @@
 plugins {
     id("java")
     id("idea")
-    id("net.fabricmc.fabric-loom") version("1.15.4")
+    id("fabric-loom") version("1.16.1")
 }
 
 evaluationDependsOn(":common")
@@ -38,17 +38,18 @@ base {
 
 dependencies {
     minecraft("com.mojang:minecraft:${MINECRAFT_VERSION}")
+    mappings(loom.officialMojangMappings())
 
-    implementation("net.fabricmc:fabric-loader:$FABRIC_LOADER_VERSION")
+    modImplementation("net.fabricmc:fabric-loader:$FABRIC_LOADER_VERSION")
 
     fun addRuntimeFabricModule(name: String) {
         val module = fabricApi.module(name, FABRIC_API_VERSION)
-        runtimeOnly(module)
+        modRuntimeOnly(module)
     }
 
     fun addEmbeddedFabricModule(name: String) {
         val module = fabricApi.module(name, FABRIC_API_VERSION)
-        implementation(module)
+        modImplementation(module)
         include(module)
     }
 
@@ -59,14 +60,14 @@ dependencies {
 
     // Fabric API modules
     addEmbeddedFabricModule("fabric-api-base")
-    addEmbeddedFabricModule("fabric-key-mapping-api-v1")
-    addRuntimeFabricModule("fabric-block-getter-api-v2")
+    addEmbeddedFabricModule("fabric-key-binding-api-v1")
+    addRuntimeFabricModule("fabric-block-view-api-v2")
     addRuntimeFabricModule("fabric-rendering-fluids-v1")
     addRuntimeFabricModule("fabric-resource-loader-v0")
     addRuntimeFabricModule("fabric-lifecycle-events-v1")
     addRuntimeFabricModule("fabric-renderer-api-v1")
 
-    implementation(SODIUM_DEPENDENCY_FABRIC)
+    modImplementation(SODIUM_DEPENDENCY_FABRIC)
     implementAndInclude("org.antlr:antlr4-runtime:4.13.1")
     implementAndInclude("io.github.douira:glsl-transformer:3.0.0-pre3")
     implementAndInclude("org.anarres:jcpp:1.4.14")
@@ -134,7 +135,11 @@ tasks {
         from(zipTree(project.project(":common").tasks.jar.get().archiveFile))
 
         manifest.attributes["Main-Class"] = "net.irisshaders.iris.LaunchWarn"
+
+        archiveClassifier.set("dev")
     }
 
-    jar.get().destinationDirectory = rootDir.resolve("build").resolve("libs")
+    named<org.gradle.jvm.tasks.Jar>("remapJar") {
+        destinationDirectory = rootDir.resolve("build").resolve("libs")
+    }
 }

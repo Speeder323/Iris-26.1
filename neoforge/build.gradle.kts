@@ -144,4 +144,4 @@ dependencies {
     includeAdditional("org.antlr:antlr4-runtime:4.13.1")
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
