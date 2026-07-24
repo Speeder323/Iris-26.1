@@ -12,7 +12,6 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.irisshaders.iris.gl.IrisRenderSystem;
 import net.irisshaders.iris.helpers.VertexBufferHelper;
-import net.irisshaders.iris.mixin.GpuDeviceAccessor;
 import org.lwjgl.opengl.GL32;
 import org.lwjgl.opengl.GL46C;
 
@@ -47,6 +46,6 @@ public class FullScreenQuadRenderer {
 	}
 
 	public void bind() {
-		((GlDevice) ((GpuDeviceAccessor) RenderSystem.getDevice()).getBackend()).vertexArrayCache().bindVertexArray(DefaultVertexFormat.POSITION_TEX, (GlBuffer) quad);
+		((GlDevice) RenderSystem.getDevice()).vertexArrayCache().bindVertexArray(DefaultVertexFormat.POSITION_TEX, (GlBuffer) quad);
 	}
 }

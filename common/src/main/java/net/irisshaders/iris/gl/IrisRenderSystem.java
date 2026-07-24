@@ -12,7 +12,6 @@ import net.irisshaders.iris.Iris;
 import net.irisshaders.iris.gl.sampler.SamplerLimits;
 import net.irisshaders.iris.gl.texture.TextureType;
 import net.irisshaders.iris.mixin.GlStateManagerAccessor;
-import net.irisshaders.iris.mixin.GpuDeviceAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.PerspectiveProjectionMatrixBuffer;
@@ -560,7 +559,7 @@ public class IrisRenderSystem {
 	}
 
 	public static GlDevice getGlDevice() {
-		return (GlDevice) ((GpuDeviceAccessor) RenderSystem.getDevice()).getBackend();
+		return (GlDevice) RenderSystem.getDevice();
 	}
 
     public interface DSAAccess {
