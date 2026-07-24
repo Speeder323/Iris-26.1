@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin(WeatherEffectRenderer.class)
 public class MixinRenderTypes {
 	@Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;useShaderTransparency()Z"))
-	private static boolean iris$writeRainAndSnowToDepthBuffer() {
+	private boolean iris$writeRainAndSnowToDepthBuffer() {
 		if (Iris.getPipelineManager().getPipeline().map(WorldRenderingPipeline::shouldWriteRainAndSnowToDepthBuffer).orElse(false)) {
 			return true;
 		}
