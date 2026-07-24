@@ -15,13 +15,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ItemFeatureRenderer.class)
 public class MixinItemFeatureRenderer {
-	@Inject(method = "renderItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SubmitNodeStorage$ItemSubmit;pose()Lcom/mojang/blaze3d/vertex/PoseStack$Pose;"))
-	private void iris$set(MultiBufferSource.BufferSource bufferSource, OutlineBufferSource outlineBufferSource, SubmitNodeStorage.ItemSubmit itemSubmit, CallbackInfo ci) {
+	@Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SubmitNodeStorage$ItemSubmit;pose()Lcom/mojang/blaze3d/vertex/PoseStack$Pose;"))
+	private void iris$set(CallbackInfo ci, @Local SubmitNodeStorage.ItemSubmit itemSubmit) {
 		((ModelStorage) (Object) itemSubmit).iris$set();
 	}
 
-	@Inject(method = "renderItem", at = @At("RETURN"))
-	private void iris$clear(MultiBufferSource.BufferSource bufferSource, OutlineBufferSource outlineBufferSource, SubmitNodeStorage.ItemSubmit submit, CallbackInfo ci) {
+	@Inject(method = "render", at = @At("RETURN"))
+	private void iris$clear(CallbackInfo ci) {
 		CapturedRenderingState.INSTANCE.setCurrentRenderedItem(0);
 		CapturedRenderingState.INSTANCE.setCurrentEntity(0);
 		CapturedRenderingState.INSTANCE.setCurrentBlockEntity(0);

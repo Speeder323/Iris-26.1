@@ -22,7 +22,7 @@ public class MixinParticleEngine {
 	private WorldRenderingPhase lastPhase = WorldRenderingPhase.NONE;
 
 	@Inject(method = "render", at = @At("HEAD"))
-	private void iris$beginDrawingParticles(SubmitNodeCollection nodeCollection, boolean translucent, CallbackInfo ci) {
+	private void iris$beginDrawingParticles(CallbackInfo ci) {
 		Iris.getPipelineManager().getPipeline().ifPresent(pipeline -> {
 			lastPhase = pipeline.getPhase();
 			pipeline.setPhase(WorldRenderingPhase.PARTICLES);
@@ -30,7 +30,7 @@ public class MixinParticleEngine {
 	}
 
 	@Inject(method = "render", at = @At("RETURN"))
-	private void iris$finishDrawingParticles(SubmitNodeCollection nodeCollection, boolean translucent, CallbackInfo ci) {
+	private void iris$finishDrawingParticles(CallbackInfo ci) {
 		Iris.getPipelineManager().getPipeline().ifPresent(pipeline -> pipeline.setPhase(lastPhase));
 	}
 }

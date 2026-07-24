@@ -23,7 +23,7 @@ import java.util.function.BiFunction;
 @Mixin(RenderSystem.class)
 public class MixinRenderSystem {
 	@Inject(method = "initRenderer", at = @At("RETURN"), remap = false)
-	private static void iris$onRendererInit(GpuDevice device, CallbackInfo ci) {
+	private static void iris$onRendererInit(long window, int maxMipmapLevels, boolean renderDebugLabels, ShaderSource shaderSource, boolean enableDebugLabels, CallbackInfo ci) {
 		Iris.duringRenderSystemInit();
 		GLDebug.reloadDebugState();
 		IrisRenderSystem.initRenderer();

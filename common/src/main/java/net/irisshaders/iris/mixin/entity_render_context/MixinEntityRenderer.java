@@ -30,7 +30,7 @@ public class MixinEntityRenderer {
     @Unique
     private int lastId = -100;
 
-    @Inject(method = "renderTranslucent", at = @At("HEAD"))
+    @Inject(method = "render", at = @At("HEAD"))
     private void setNameTagId(SubmitNodeCollection nodeCollection, MultiBufferSource.BufferSource bufferSource, Font font, CallbackInfo ci) { 
         Object2IntFunction<NamespacedId> entityIds = WorldRenderingSettings.INSTANCE.getEntityIds();
 
@@ -40,7 +40,7 @@ public class MixinEntityRenderer {
         CapturedRenderingState.INSTANCE.setCurrentEntity(entityIds.applyAsInt(NAME_TAG_ID));
     }
 
-    @Inject(method = "renderTranslucent", at = @At("RETURN"))
+    @Inject(method = "render", at = @At("RETURN"))
     private void resetId(SubmitNodeCollection nodeCollection, MultiBufferSource.BufferSource bufferSource, Font font, CallbackInfo ci) {
         if (lastId != -100) {
             CapturedRenderingState.INSTANCE.setCurrentEntity(lastId);
