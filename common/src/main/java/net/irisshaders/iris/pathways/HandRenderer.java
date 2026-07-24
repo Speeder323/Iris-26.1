@@ -43,22 +43,22 @@ public class HandRenderer {
 		featureRenderDispatcher = new FeatureRenderDispatcher(submitNodeCollector, Minecraft.getInstance().getBlockRenderer(), bufferSource.bufferSource(), Minecraft.getInstance().getAtlasManager(), bufferSource.outlineBufferSource(), bufferSource.crumblingBufferSource(), Minecraft.getInstance().font);
 	}
 
-	private PoseStack setupGlState(GameRenderer gameRenderer, CameraRenderState camera, Matrix4fc modelMatrix, float tickDelta) {
+	private PoseStack setupGlState(GameRenderer gameRenderer, Camera camera, Matrix4fc modelMatrix, float tickDelta) {
 		final PoseStack poseStack = new PoseStack();
 
 		// We need to scale the matrix by 0.125 so the hand doesn't clip through blocks.
+		// The hand uses vanilla's dedicated hand FOV (ignoring the FOV slider), not the world projection.
 		Matrix4f scaleMatrix = new Matrix4f().scale(1F, 1F, DEPTH);
-		scaleMatrix.mul(CapturedRenderingState.INSTANCE.getGbufferProjection());
+		scaleMatrix.mul(gameRenderer.getProjectionMatrix(((GameRendererAccessor) gameRenderer).invokeGetFov(camera, tickDelta, false)));
+		RenderSystem.setProjectionMatrix(cachedProjectionMatrixBuffer.getBuffer(scaleMatrix), ProjectionType.PERSPECTIVE);
 
-		poseStack.pushPose();
+		poseStack.setIdentity();
 		((GameRendererAccessor) gameRenderer).invokeBobHurt(poseStack, tickDelta);
 		if (Minecraft.getInstance().options.bobView().get()) {
 			((GameRendererAccessor) gameRenderer).invokeBobView(poseStack, tickDelta);
 		}
-		scaleMatrix.mul(poseStack.last().pose());
-		RenderSystem.setProjectionMatrix(cachedProjectionMatrixBuffer.getBuffer(scaleMatrix), ProjectionType.PERSPECTIVE);
 
-		return new PoseStack();
+		return poseStack;
 	}
 
 	private boolean canRender(Camera camera, GameRenderer gameRenderer) {
@@ -89,7 +89,7 @@ public class HandRenderer {
 
 		ACTIVE = true;
 
-		PoseStack poseStack = setupGlState(gameRenderer, cameraState, modelMatrix, tickDelta);
+		PoseStack poseStack = setupGlState(gameRenderer, camera, modelMatrix, tickDelta);
 
 		pipeline.setPhase(WorldRenderingPhase.HAND_SOLID);
 
@@ -130,7 +130,7 @@ public class HandRenderer {
 
 		pipeline.setPhase(WorldRenderingPhase.HAND_TRANSLUCENT);
 
-		PoseStack poseStack = setupGlState(gameRenderer, cameraState, modelMatrix, tickDelta);
+		PoseStack poseStack = setupGlState(gameRenderer, camera, modelMatrix, tickDelta);
 
 		poseStack.pushPose();
 
