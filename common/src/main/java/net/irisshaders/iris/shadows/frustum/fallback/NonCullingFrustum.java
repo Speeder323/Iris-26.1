@@ -6,7 +6,6 @@ import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
 import org.joml.FrustumIntersection;
-import org.joml.Matrix4fc;
 import org.joml.Matrix4f;
 import org.joml.Vector3d;
 
@@ -15,10 +14,6 @@ public class NonCullingFrustum extends Frustum implements ViewportProvider, net.
 
 	public NonCullingFrustum() {
 		super(new Matrix4f(), new Matrix4f());
-	}
-
-	public NonCullingFrustum(final Matrix4fc modelViewMatrix, final Matrix4f projectionMatrixForCulling) {
-		super(modelViewMatrix, projectionMatrixForCulling);
 	}
 
 	// For Immersive Portals

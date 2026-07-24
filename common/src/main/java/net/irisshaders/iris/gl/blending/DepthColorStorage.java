@@ -25,7 +25,7 @@ public class DepthColorStorage {
 		depthColorLocked = false;
 
 		GlStateManager._depthMask(false);
-		GlStateManager._colorMask(0);
+		GlStateManager._colorMask(false, false, false, false);
 
 		depthColorLocked = true;
 	}
@@ -47,6 +47,6 @@ public class DepthColorStorage {
 
 		GlStateManager._depthMask(originalDepthEnable);
 
-		GlStateManager._colorMask(originalColor);
+		GlStateManager._colorMask((originalColor & 1) != 0, (originalColor & 2) != 0, (originalColor & 4) != 0, (originalColor & 8) != 0);
 	}
 }

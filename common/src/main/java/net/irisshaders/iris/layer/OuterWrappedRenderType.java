@@ -4,7 +4,6 @@ import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import net.irisshaders.iris.mixin.rendertype.RenderTypeAccessor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
@@ -35,11 +34,6 @@ public class OuterWrappedRenderType extends RenderType {
 
 	private RenderType unwrap() {
 		return wrapped;
-	}
-
-	@Override
-	public boolean hasBlending() {
-		return wrapped.hasBlending();
 	}
 
 	@Override

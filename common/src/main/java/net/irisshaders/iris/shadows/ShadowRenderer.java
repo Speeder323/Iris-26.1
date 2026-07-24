@@ -42,8 +42,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.debug.DebugScreenDisplayer;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.state.level.CameraRenderState;
-import net.minecraft.client.renderer.state.level.LevelRenderState;
+import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.LevelRenderState;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.OutlineBufferSource;
@@ -179,7 +179,7 @@ public class ShadowRenderer {
 
 		levelRenderState = new LevelRenderState();
 		submitNodeStorage = new SubmitNodeStorage();
-		featureRenderDispatcher = new FeatureRenderDispatcher(submitNodeStorage, Minecraft.getInstance().getModelManager(), buffers.bufferSource(), Minecraft.getInstance().getAtlasManager(), outlineBuffers, buffers.crumblingBufferSource(), Minecraft.getInstance().font, Minecraft.getInstance().gameRenderer.getGameRenderState());
+		featureRenderDispatcher = new FeatureRenderDispatcher(submitNodeStorage, Minecraft.getInstance().getBlockRenderer(), buffers.bufferSource(), Minecraft.getInstance().getAtlasManager(), outlineBuffers, buffers.crumblingBufferSource(), Minecraft.getInstance().font);
 	}
 
 	public static PoseStack createShadowModelView(float sunPathRotation, float intervalSize, float nearPlane, float farPlane) {
@@ -387,7 +387,11 @@ public class ShadowRenderer {
 		}
 
 		GpuSampler theSampler = RenderSystem.getSamplerCache().getSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE, FilterMode.NEAREST, FilterMode.NEAREST, true);
-		playerCamera.extractRenderState(levelRenderState.cameraRenderState, CapturedRenderingState.INSTANCE.getTickDelta());
+		levelRenderState.cameraRenderState.blockPos = renderState.blockPos;
+		levelRenderState.cameraRenderState.pos = renderState.pos;
+		levelRenderState.cameraRenderState.orientation = renderState.orientation;
+		levelRenderState.cameraRenderState.entityPos = renderState.entityPos;
+		levelRenderState.cameraRenderState.initialized = renderState.initialized;
 		Minecraft client = Minecraft.getInstance();
 
 		ProfilerFiller profiler = Profiler.get();
@@ -415,7 +419,6 @@ public class ShadowRenderer {
 		// Create our camera
 		PoseStack modelView = createShadowModelView(this.sunPathRotation, this.intervalSize, nearPlane, farPlane);
 		MODELVIEW = new Matrix4f(modelView.last().pose());
-		levelRenderState.cameraRenderState.viewRotationMatrix = MODELVIEW;
 
 		RenderSystem.getModelViewStack().pushMatrix();
 		RenderSystem.getModelViewStack().set(MODELVIEW);
@@ -428,7 +431,6 @@ public class ShadowRenderer {
 		} else {
 			shadowProjection = ShadowMatrices.createOrthoMatrix(halfPlaneLength, Mth.equal(nearPlane, -1.0f) ? -DHCompat.getRenderDistance() * 16 : nearPlane, Mth.equal(farPlane, -1.0f) ? DHCompat.getRenderDistance() * 16 : farPlane);
 		}
-		levelRenderState.cameraRenderState.projectionMatrix = shadowProjection;
 
 		IrisRenderSystem.setShadowProjection(shadowProjection);
 

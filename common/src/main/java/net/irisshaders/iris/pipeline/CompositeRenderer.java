@@ -7,10 +7,8 @@ import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.opengl.GlBuffer;
 import com.mojang.blaze3d.opengl.GlConst;
 import com.mojang.blaze3d.opengl.GlStateManager;
-import com.mojang.blaze3d.pipeline.ColorTargetState;
-import com.mojang.blaze3d.pipeline.DepthStencilState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.platform.CompareOp;
+import com.mojang.blaze3d.platform.DepthTestFunction;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -75,8 +73,10 @@ import java.util.function.Supplier;
 
 public class CompositeRenderer {
 	public static final RenderPipeline COMPOSITE_PIPELINE = RenderPipeline.builder()
-		.withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
-		.withColorTargetState(ColorTargetState.DEFAULT)
+		.withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+		.withDepthWrite(false)
+		.withColorWrite(true)
+		.withoutBlend()
 		.withLocation(Identifier.fromNamespaceAndPath("iris", "composite")).withVertexShader("core/screenquad").withFragmentShader("core/blit_screen")
 		.withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
 		.build();
@@ -278,7 +278,7 @@ public class CompositeRenderer {
 		VertexFormat.IndexType type = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS).type();
 
 		FullScreenQuadRenderer.INSTANCE.bind();
-		GlStateManager._colorMask(15);
+		GlStateManager._colorMask(true, true, true, true);
 
 		for (int i = 0, passesSize = passes.size(); i < passesSize; i++) {
 			Pass compositePass = passes.get(i);

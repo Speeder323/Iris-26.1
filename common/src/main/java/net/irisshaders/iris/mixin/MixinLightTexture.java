@@ -2,8 +2,7 @@ package net.irisshaders.iris.mixin;
 
 import net.irisshaders.iris.uniforms.CapturedRenderingState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LightmapRenderStateExtractor;
-import net.minecraft.client.renderer.state.LightmapRenderState;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,19 +12,19 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(LightmapRenderStateExtractor.class)
+@Mixin(LightTexture.class)
 public class MixinLightTexture {
 	@Shadow
 	@Final
 	private Minecraft minecraft;
 
-	@Inject(method = "extract", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/world/attribute/EnvironmentAttributeProbe;getValue(Lnet/minecraft/world/attribute/EnvironmentAttribute;F)Ljava/lang/Object;"))
-	private void resetDarknessValue(LightmapRenderState renderState, float partialTicks, CallbackInfo ci) {
+	@Inject(method = "updateLightTexture", at = @At(value = "INVOKE", ordinal = 0, target = "Lnet/minecraft/world/attribute/EnvironmentAttributeProbe;getValue(Lnet/minecraft/world/attribute/EnvironmentAttribute;F)Ljava/lang/Object;"))
+	private void resetDarknessValue(float partialTicks, CallbackInfo ci) {
 		CapturedRenderingState.INSTANCE.setDarknessLightFactor(0.0F);
 	}
 
 	@Inject(method = "calculateDarknessScale", at = @At("RETURN"))
-	private void storeDarknessValue(LivingEntity $$0, float $$1, float $$2, CallbackInfoReturnable<Float> cir) {
+	private void storeDarknessValue(LivingEntity entity, float darknessFactor, float partialTicks, CallbackInfoReturnable<Float> cir) {
 		CapturedRenderingState.INSTANCE.setDarknessLightFactor((float) (cir.getReturnValue() * this.minecraft.options.darknessEffectScale().get()));
 	}
 }
